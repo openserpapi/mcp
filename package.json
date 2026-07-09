@@ -1,0 +1,66 @@
+{
+  "name": "@openserp/mcp",
+  "version": "0.1.6",
+  "description": "Model Context Protocol server for OpenSERP OSS and OpenSERP Cloud.",
+  "type": "module",
+  "license": "MIT",
+  "author": "OpenSERP",
+  "homepage": "https://openserp.org",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openserpapi/mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/openserpapi/mcp/issues"
+  },
+  "keywords": [
+    "openserp",
+    "mcp",
+    "model-context-protocol",
+    "serp",
+    "search",
+    "agent-tools"
+  ],
+  "bin": {
+    "openserp-mcp": "./dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "dev:stdio": "tsx src/index.ts --stdio",
+    "dev:http": "tsx src/index.ts --http --port 3333",
+    "start:stdio": "node dist/index.js --stdio",
+    "start:http": "node dist/index.js --http --port 3333",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@openserp/sdk": "^0.2.4",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
