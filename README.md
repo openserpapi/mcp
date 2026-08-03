@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@openserp/mcp.svg)](https://www.npmjs.com/package/@openserp/mcp)
 [![license](https://img.shields.io/npm/l/@openserp/mcp.svg)](https://github.com/openserpapi/mcp/blob/main/LICENSE.md)
 
-Model Context Protocol server for OpenSERP OSS and OpenSERP Cloud. It gives MCP clients search, image search, URL extraction, usage, and engine metadata tools.
+Model Context Protocol server for OpenSERP OSS and OpenSERP Cloud. It gives MCP clients search, image search, single and batch URL extraction, usage, and engine metadata tools.
 
 When `OPENSERP_API_KEY` is not set, the server uses OSS mode at `http://localhost:7000` and writes:
 
@@ -38,6 +38,7 @@ npx -y @openserp/mcp --stdio
 - `get_usage`
 - `list_engines`
 - `extract`
+- `batch_extract`
 
 ## Quick Examples
 
@@ -46,6 +47,8 @@ Ask your MCP client to:
 - Search Google for current docs and return the top 5 URLs.
 - Compare Google and Bing results for an SEO keyword.
 - Extract clean Markdown from a URL before passing it to an LLM.
+- Ground an answer in several sources at once with `batch_extract` - up to 20 URLs in one round-trip, where a dead link returns an error item instead of failing the batch.
+- Read a geo-fenced page as a local visitor by passing `region: "DE"`.
 - Check remaining Cloud credits with `get_usage`.
 
 ## Claude Desktop

@@ -1,6 +1,6 @@
 {
   "name": "@openserp/mcp",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Model Context Protocol server for OpenSERP OSS and OpenSERP Cloud.",
   "type": "module",
   "license": "MIT",
@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@openserp/sdk": "^0.2.4",
+    "@openserp/sdk": "^0.2.6",
     "zod": "^4.1.13"
   },
   "devDependencies": {

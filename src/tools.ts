@@ -33,6 +33,9 @@ export async function callTool(
       case "extract":
         requireString(input, "url");
         return toolResult(await client.extract(input as any));
+      case "batch_extract":
+        requireArray(input, "urls");
+        return toolResult(await client.batchExtract(input as any));
       case "get_usage":
         return toolResult(await getUsage(client));
       case "list_engines":
@@ -92,6 +95,13 @@ function assertObject(value: unknown): Record<string, unknown> {
 function requireString(input: Record<string, unknown>, key: string): void {
   if (typeof input[key] !== "string" || input[key] === "") {
     throw new Error(`Missing required string argument: ${key}`);
+  }
+}
+
+function requireArray(input: Record<string, unknown>, key: string): void {
+  const value = input[key];
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error(`Missing required array argument: ${key}`);
   }
 }
 

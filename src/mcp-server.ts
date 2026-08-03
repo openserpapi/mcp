@@ -7,6 +7,10 @@ const engines = ["google", "bing", "yandex", "baidu", "duck", "duckduckgo", "eco
 const formats = ["json", "markdown", "text", "ndjson"] as const;
 const megaModes = ["balanced", "any", "fast"] as const;
 const extractModes = ["auto", "fast", "rendered"] as const;
+const httpUrl = z
+  .string()
+  .url()
+  .refine((url) => /^https?:\/\//i.test(url), "URL must use http or https");
 
 // Replaced at build time with the package.json version (see tsup.config.ts).
 // Falls back to "dev" when run from source without the define in place.
@@ -184,7 +188,7 @@ export function createMcpServer(client: OpenSERP): McpServer {
       title: "Extract URL",
       description: "Extract LLM-ready content from a URL.",
       inputSchema: {
-        url: z.string().url().describe("Absolute URL to fetch and extract."),
+        url: httpUrl.describe("Absolute URL to fetch and extract."),
         mode: z.enum(extractModes).optional().default("auto").describe("Extraction strategy."),
         lang: z.string().optional().describe("Language hint."),
         minRunes: z
@@ -198,10 +202,54 @@ export function createMcpServer(client: OpenSERP): McpServer {
           .boolean()
           .optional()
           .describe("Prefer /llms-full.txt or /llms.txt for site roots."),
+        region: z
+          .string()
+          .regex(/^[a-z]{2}$/i)
+          .optional()
+          .describe(
+            "Two-letter country code to extract from, e.g. US or DE, for geo-fenced or localized pages. On Cloud this adds 1 credit per extracted URL.",
+          ),
         format: z.enum(formats).optional().default("json").describe("Response format."),
       },
     },
     (args) => callTool(client, "extract", args),
+  );
+
+  server.registerTool(
+    "batch_extract",
+    {
+      title: "Extract several URLs",
+      description:
+        "Extract LLM-ready content from up to 20 URLs in one request. Prefer this over repeated extract calls when grounding an answer in several pages: it is one round-trip, and a URL that fails returns an item with an error instead of failing the batch.",
+      inputSchema: {
+        urls: z
+          .array(httpUrl)
+          .min(1)
+          .max(20)
+          .describe("Absolute URLs to fetch and extract. Duplicates are dropped."),
+        mode: z.enum(extractModes).optional().default("auto").describe("Extraction strategy."),
+        lang: z.string().optional().describe("Language hint."),
+        minRunes: z
+          .number()
+          .int()
+          .min(0)
+          .optional()
+          .describe("Minimum content length (in runes) before auto mode escalates to rendered extraction."),
+        clean: z.boolean().optional().describe("Use article-only extraction when true."),
+        useLlmsTxt: z
+          .boolean()
+          .optional()
+          .describe("Prefer /llms-full.txt or /llms.txt for site roots."),
+        region: z
+          .string()
+          .regex(/^[a-z]{2}$/i)
+          .optional()
+          .describe(
+            "Two-letter country code applied to every URL, e.g. US or DE. On Cloud this adds 1 credit per extracted URL.",
+          ),
+      },
+    },
+    (args) => callTool(client, "batch_extract", args),
   );
 
   return server;
