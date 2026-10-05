@@ -33,11 +33,11 @@ const commonSearchSchema = {
     .string()
     .regex(/^[0-9]{8}\.\.[0-9]{8}$/)
     .optional()
-    .describe("Date interval in YYYYMMDD..YYYYMMDD format."),
+    .describe("Published-date range YYYYMMDD..YYYYMMDD. Cloud web search supports Google and Ecosia; unsupported filters return 400 without charge."),
   file: z.string().optional().describe("File extension filter, such as PDF."),
   site: z.string().optional().describe("Domain filter, such as example.com."),
   limit: z.number().int().min(1).max(100).optional().describe("Maximum result count."),
-  start: z.number().int().min(0).optional().describe("Pagination offset."),
+  start: z.number().int().min(0).optional().describe("Result offset. On Cloud, Google/Bing/Yandex use multiples of 10, Baidu supports early pages, Ecosia any offset, DuckDuckGo none. Balanced mega requires 0; unsupported offsets return 400."),
   filter: z.boolean().optional().describe("Enable duplicate filtering."),
   features: z.boolean().optional().describe("Include supported rich SERP features."),
   format: z.enum(formats).optional().default("json").describe("Response format."),
@@ -70,8 +70,8 @@ const megaEngineSchema = {
   engines: z
     .array(z.enum(engines))
     .optional()
-    .describe("Engines to query. Omit to use all available engines."),
-  mode: z.enum(megaModes).optional().default("balanced").describe("Mega execution mode."),
+    .describe("Engines to query. Omit to use the default engine set."),
+  mode: z.enum(megaModes).optional().default("balanced").describe("balanced merges results. Cloud any starts engines in your order, overlapping slow attempts; fast orders the same race by health and latency. Only any/fast support start above 0."),
   dedupe: z.boolean().optional().describe("Deduplicate by normalized URL."),
   merge: z.boolean().optional().describe("Merge successful engine results."),
 };
@@ -123,7 +123,7 @@ export function createMcpServer(client: OpenSERP): McpServer {
     "fast_search",
     {
       title: "Fast Search",
-      description: "Search using the fastest currently healthy engine.",
+      description: "Return the first successful web result set, prioritizing healthy, low-latency engines.",
       inputSchema: fastOrAnySchema,
     },
     (args) => callTool(client, "fast_search", args),
@@ -133,7 +133,7 @@ export function createMcpServer(client: OpenSERP): McpServer {
     "any_search",
     {
       title: "Any Search",
-      description: "Try engines in order and return the first successful web result set.",
+      description: "Start engines in your order and return the first successful web result set. On Cloud, slow attempts can overlap.",
       inputSchema: fastOrAnySchema,
     },
     (args) => callTool(client, "any_search", args),
@@ -176,7 +176,7 @@ export function createMcpServer(client: OpenSERP): McpServer {
     "list_engines",
     {
       title: "List Engines",
-      description: "List available engines on OSS or Cloud engine capabilities on Cloud.",
+      description: "List OSS engines or Cloud capabilities and operational status.",
       inputSchema: {},
     },
     () => callTool(client, "list_engines", {}),

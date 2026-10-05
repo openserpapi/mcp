@@ -51,6 +51,16 @@ Ask your MCP client to:
 - Read a geo-fenced page as a local visitor by passing `region: "DE"`.
 - Check remaining Cloud credits with `get_usage`.
 
+## Cloud search parameters
+
+Cloud requests use `Authorization: Bearer` with `OPENSERP_API_KEY`. For paging, use `start` and keep `limit: 10`; pass the previous response's `pagination.next_start` while `has_more` is true. Google, Bing, and Yandex take multiples of 10; Baidu supports early pages, Ecosia any offset, and DuckDuckGo only the first page. `mega_search` with `mode: "balanced"` rejects `start > 0`; use `search`, `any_search`, or `fast_search` for later pages.
+
+Cloud web search supports `date: "20250101..20251231"` on Google and Ecosia. Unsupported offsets or date filters return `400 invalid_request` without charge; adjust the request before retrying.
+
+`list_engines` returns Cloud capabilities plus operational `status`. Omit `engines` to use defaults. Any starts engines in your order, overlapping slow attempts; Fast prioritizes recent health and latency. Read `meta.engine_used` for the winner; `engines_tried` and `engines_skipped` may be absent.
+
+Tool errors include the public HTTP status, error code, request ID, and retry delay when present. Honor `retry_after` for `429` and `503`; `503 engine_unavailable` carries a 60-second delay. The server does not retry automatically.
+
 ## Claude Desktop
 
 Local OSS mode:

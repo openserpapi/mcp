@@ -1,6 +1,6 @@
 {
   "name": "@openserp/mcp",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Model Context Protocol server for OpenSERP OSS and OpenSERP Cloud.",
   "type": "module",
   "license": "MIT",
@@ -42,11 +42,12 @@
     "dev:http": "tsx src/index.ts --http --port 3333",
     "start:stdio": "node dist/index.js --stdio",
     "start:http": "node dist/index.js --http --port 3333",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/cloud-contract.test.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@openserp/sdk": "^0.2.6",
+    "@openserp/sdk": "^0.2.7",
     "zod": "^4.1.13"
   },
   "devDependencies": {

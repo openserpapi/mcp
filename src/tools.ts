@@ -1,4 +1,4 @@
-import { OpenSERP } from "@openserp/sdk";
+import { OpenSERP, SERPError } from "@openserp/sdk";
 import { DASHBOARD_STATUS_URL } from "./messages";
 
 export interface ToolCallResult {
@@ -72,6 +72,7 @@ async function listEngines(client: OpenSERP): Promise<unknown> {
       backend: client.backend,
       baseUrl: client.baseUrl,
       capabilities: await client.enginesCapabilities(),
+      status: await client.enginesStatus(),
     };
   }
 
@@ -117,6 +118,14 @@ function toolResult(value: unknown): ToolCallResult {
 }
 
 function formatError(err: unknown): string {
+  if (err instanceof SERPError) {
+    return `${err.message}\n${JSON.stringify({
+      status: err.status,
+      error: err.code,
+      request_id: err.requestId,
+      retry_after: err.retryAfter,
+    })}`;
+  }
   if (err instanceof Error) {
     return err.message;
   }
