@@ -23,7 +23,7 @@
     "agent-tools"
   ],
   "bin": {
-    "openserp-mcp": "./dist/index.js"
+    "openserp-mcp": "dist/index.js"
   },
   "exports": {
     ".": {

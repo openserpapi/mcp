@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write # npm trusted publishing (OIDC), no NPM_TOKEN
 
 jobs:
   publish:
@@ -23,5 +24,3 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
