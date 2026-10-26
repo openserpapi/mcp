@@ -1,0 +1,55 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "org.openserp/mcp",
+  "title": "OpenSERP",
+  "description": "Search Google, Bing, Yandex, Baidu, DuckDuckGo and Ecosia with original ranks, plus page extraction.",
+  "version": "0.1.9",
+  "websiteUrl": "https://openserp.org",
+  "repository": {
+    "url": "https://github.com/openserpapi/mcp",
+    "source": "github",
+    "id": "1291364177"
+  },
+  "icons": [
+    {
+      "src": "https://openserp.org/icon.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": ["any"]
+    },
+    {
+      "src": "https://openserp.org/web-app-manifest-512x512.png",
+      "mimeType": "image/png",
+      "sizes": ["512x512"]
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@openserp/mcp",
+      "version": "0.1.9",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "OPENSERP_API_KEY",
+          "description": "OpenSERP Cloud API key. Leave unset to use a self-hosted OpenSERP server (http://localhost:7000 by default).",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string",
+          "placeholder": "osk_live_xxx"
+        },
+        {
+          "name": "OPENSERP_BASE_URL",
+          "description": "OpenSERP API base URL, for a self-hosted server on another host or port.",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string",
+          "placeholder": "http://localhost:7000"
+        }
+      ]
+    }
+  ]
+}

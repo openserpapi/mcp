@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@openserp/mcp.svg)](https://www.npmjs.com/package/@openserp/mcp)
 [![license](https://img.shields.io/npm/l/@openserp/mcp.svg)](https://github.com/openserpapi/mcp/blob/main/LICENSE.md)
 
-Model Context Protocol server for OpenSERP OSS and OpenSERP Cloud. It gives MCP clients search, image search, single and batch URL extraction, usage, and engine metadata tools.
+Live search on six engines (Google, Bing, Yandex, Baidu, DuckDuckGo, Ecosia), image search and single/batch page extraction for AI agents. Results keep the source engine and rank. Runs against a self-hosted [OpenSERP](https://github.com/karust/openserp) server or OpenSERP Cloud.
 
 When `OPENSERP_API_KEY` is not set, the server uses OSS mode at `http://localhost:7000` and writes:
 
@@ -39,6 +39,8 @@ npx -y @openserp/mcp --stdio
 - `list_engines`
 - `extract`
 - `batch_extract`
+
+`extract` and `batch_extract` cut long pages to fit an agent's context: 20,000 characters per page, or 40,000 shared across a batch (at least 2,000 per URL). Cut content ends with a `[truncated: ...]` line and is flagged (`truncated` / `metadata.truncated`). Pass `maxChars` to read more.
 
 ## Quick Examples
 

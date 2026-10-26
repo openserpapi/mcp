@@ -19,5 +19,6 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: npm install
       - run: npm run typecheck
+      - run: npm test
       - run: npm run build
       - run: npm pack --dry-run

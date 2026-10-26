@@ -210,6 +210,12 @@ export function createMcpServer(client: OpenSERP): McpServer {
             "Two-letter country code to extract from, e.g. US or DE, for geo-fenced or localized pages. On Cloud this adds 1 credit per extracted URL.",
           ),
         format: z.enum(formats).optional().default("json").describe("Response format."),
+        maxChars: z
+          .number()
+          .int()
+          .min(500)
+          .optional()
+          .describe("Max characters of page content (default 20000). Longer pages are cut and marked truncated."),
       },
     },
     (args) => callTool(client, "extract", args),
@@ -246,6 +252,14 @@ export function createMcpServer(client: OpenSERP): McpServer {
           .optional()
           .describe(
             "Two-letter country code applied to every URL, e.g. US or DE. On Cloud this adds 1 credit per extracted URL.",
+          ),
+        maxChars: z
+          .number()
+          .int()
+          .min(500)
+          .optional()
+          .describe(
+            "Max characters of content per URL. Default splits 40000 across the batch (at least 2000 each). Longer pages are cut and marked metadata.truncated.",
           ),
       },
     },

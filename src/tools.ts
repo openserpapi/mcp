@@ -1,4 +1,4 @@
-import { OpenSERP, SERPError } from "@openserp/sdk";
+import { OpenSERP, SERPError, type BatchExtractResult } from "@openserp/sdk";
 import { DASHBOARD_STATUS_URL } from "./messages";
 
 export interface ToolCallResult {
@@ -6,6 +6,15 @@ export interface ToolCallResult {
   content: Array<{ type: "text"; text: string }>;
   isError?: boolean;
 }
+
+// Long pages (changelog archives, docs indexes) can exceed an MCP client's
+// tool-output limit, so extracted content is cut to a per-page budget and
+// marked as truncated. maxChars raises it. Claude Code moves results over
+// 50k chars to a file, so a batch leaves ~10k for JSON and metadata.
+export const EXTRACT_MAX_CHARS = 20_000;
+const BATCH_MAX_CHARS = 40_000; // shared across the URLs of one batch
+const BATCH_MIN_CHARS = 2_000;
+const MAX_LINKS = 50;
 
 export async function callTool(
   client: OpenSERP,
@@ -30,12 +39,19 @@ export async function callTool(
         return toolResult(await client.image(input as any));
       case "mega_image":
         return toolResult(await client.megaImage(input as any));
-      case "extract":
+      case "extract": {
         requireString(input, "url");
-        return toolResult(await client.extract(input as any));
-      case "batch_extract":
+        const { maxChars, ...params } = input;
+        const limit = charBudget(maxChars, EXTRACT_MAX_CHARS);
+        return toolResult(trimExtract(await client.extract(params as any), limit));
+      }
+      case "batch_extract": {
         requireArray(input, "urls");
-        return toolResult(await client.batchExtract(input as any));
+        const { maxChars, ...params } = input;
+        const perPage = Math.max(BATCH_MIN_CHARS, Math.floor(BATCH_MAX_CHARS / (input.urls as unknown[]).length));
+        const limit = charBudget(maxChars, perPage);
+        return toolResult(trimBatch(await client.batchExtract(params as any), limit));
+      }
       case "get_usage":
         return toolResult(await getUsage(client));
       case "list_engines":
@@ -104,6 +120,53 @@ function requireArray(input: Record<string, unknown>, key: string): void {
   if (!Array.isArray(value) || value.length === 0) {
     throw new Error(`Missing required array argument: ${key}`);
   }
+}
+
+function charBudget(value: unknown, fallback: number): number {
+  return typeof value === "number" && value > 0 ? Math.floor(value) : fallback;
+}
+
+function cut(text: string, limit: number): string {
+  return `${text.slice(0, limit)}\n\n[truncated: ${limit} of ${text.length} characters, raise maxChars to read more]`;
+}
+
+function trimExtract(value: unknown, limit: number): unknown {
+  if (typeof value === "string") {
+    return value.length > limit ? cut(value, limit) : value;
+  }
+  if (!value || typeof value !== "object") {
+    return value;
+  }
+  const page = { ...(value as Record<string, unknown>) };
+  let truncated = false;
+  for (const key of ["markdown", "text"]) {
+    const text = page[key];
+    if (typeof text === "string" && text.length > limit) {
+      page[key] = cut(text, limit);
+      truncated = true;
+    }
+  }
+  if (Array.isArray(page.links) && page.links.length > MAX_LINKS) {
+    page.links = page.links.slice(0, MAX_LINKS);
+    truncated = true;
+  }
+  return truncated ? { ...page, truncated: true } : page;
+}
+
+function trimBatch(value: BatchExtractResult, limit: number): BatchExtractResult {
+  const results = value.results?.map((item) => {
+    const content = item.page_content;
+    if (typeof content !== "string" || content.length <= limit) {
+      return item;
+    }
+    return {
+      ...item,
+      page_content: cut(content, limit),
+      // batch metadata is a string map (Open WebUI loader contract)
+      metadata: { ...item.metadata, truncated: "true", total_chars: String(content.length) },
+    };
+  });
+  return { ...value, results };
 }
 
 function toolResult(value: unknown): ToolCallResult {
