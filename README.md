@@ -29,16 +29,18 @@ npx -y @openserp/mcp --stdio
 
 ## Tools
 
-- `search`
-- `mega_search`
-- `fast_search`
-- `any_search`
-- `image_search`
-- `mega_image`
-- `get_usage`
-- `list_engines`
-- `extract`
-- `batch_extract`
+| Tool | Use it when |
+| --- | --- |
+| `search` | The engine matters (Yandex for Russian, Baidu for Chinese), or you page with `start` |
+| `any_search` | You want a preferred engine with fallbacks, in your order |
+| `fast_search` | Any engine will do; picks the healthiest, fastest one |
+| `mega_search` | You compare engines or want wider coverage; results keep engine and rank |
+| `image_search` | Images from one engine |
+| `mega_image` | Images merged from several engines |
+| `extract` | Reading one page as Markdown |
+| `batch_extract` | Reading several pages (up to 20) in one call; a failed URL doesn't fail the batch |
+| `list_engines` | Searches keep failing and you need a healthy engine |
+| `get_usage` | Checking the Cloud credit balance or what the last call cost |
 
 `extract` and `batch_extract` cut long pages to fit an agent's context: 20,000 characters per page, or 40,000 shared across a batch (at least 2,000 per URL). Cut content ends with a `[truncated: ...]` line and is flagged (`truncated` / `metadata.truncated`). Pass `maxChars` to read more.
 
