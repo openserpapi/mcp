@@ -17,7 +17,28 @@ jobs:
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
-      - run: npm install
+      # This paired PR depends on SDK 0.2.8, which must not be published yet.
+      # Test the exact reviewed SDK commit without changing release dependencies.
+      # Main and unrelated PRs continue to install the registry dependency.
+      - name: Check out paired SDK preview
+        if: github.event_name == 'pull_request' && github.head_ref == 'agent-context'
+        uses: actions/checkout@v6
+        with:
+          repository: openserpapi/sdk-js
+          ref: 2f0c988629ec20a070a394f49fb803e358aa195d
+          path: .ci-sdk
+      - name: Build paired SDK preview
+        if: github.event_name == 'pull_request' && github.head_ref == 'agent-context'
+        working-directory: .ci-sdk
+        run: |
+          npm install
+          npm run build
+      - name: Install with paired preview SDK
+        if: github.event_name == 'pull_request' && github.head_ref == 'agent-context'
+        run: npm install --no-save --package-lock=false ./.ci-sdk
+      - name: Install dependencies
+        if: github.event_name != 'pull_request' || github.head_ref != 'agent-context'
+        run: npm install
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
