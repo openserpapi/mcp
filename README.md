@@ -1,5 +1,26 @@
 # @openserp/mcp
 
+## Agent context preview (0.1.11)
+
+The `get_context` tool searches a question and optional variants, reads sources,
+and returns relevant passages, citations and a token-bounded context string:
+
+```json
+{"query":"PostgreSQL logical replication restrictions","engines":["google","bing"],"maxTokens":6000}
+```
+
+Use your normal `OPENSERP_API_KEY`. Cloud currently authorizes only active
+accounts tagged `admin` on the server; other accounts receive 404. Never put
+ADMIN_SECRET in MCP configuration. No automatic retry is performed. Inspect
+`partial`, `truncated` and `failures`. The server measures `maxTokens` against only
+the `context` string using cl100k_base, not the surrounding JSON. MCP preserves
+source spans and does not apply another character-based cut to this response.
+
+Release dependency: publish `@openserp/sdk` 0.2.8 before publishing MCP 0.1.11.
+For local preview development, build the sibling SDK and run
+`npm install --no-save --package-lock=false ../sdk-js`, then build/test MCP.
+No packages are published by this change.
+
 [![npm version](https://img.shields.io/npm/v/@openserp/mcp.svg)](https://www.npmjs.com/package/@openserp/mcp)
 [![license](https://img.shields.io/npm/l/@openserp/mcp.svg)](https://github.com/openserpapi/mcp/blob/main/LICENSE.md)
 

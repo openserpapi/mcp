@@ -28,6 +28,11 @@ export async function callTool(
       case "search":
         requireString(input, "engine");
         return toolResult(await client.search(input as any));
+      case "get_context":
+        requireString(input, "query");
+        // The server already applies an exact token budget. A second character
+        // cut here would invalidate citation spans and silently lose evidence.
+        return toolResult(await client.context(input as any));
       case "mega_search":
         return toolResult(await client.megaSearch(input as any));
       case "fast_search":
