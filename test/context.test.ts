@@ -3,13 +3,31 @@ import { test } from "node:test";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { OpenSERP } from "@openserp/sdk";
-import { createMcpServer } from "../src/mcp-server";
+import { createMcpServer, registerContextTool } from "../src/mcp-server";
 
-test("get_context is registered, forwards budgets and preserves citations and preview errors", async () => {
+const PUBLIC_TOOLS = [
+  "any_search", "batch_extract", "extract", "fast_search", "get_usage",
+  "image_search", "list_engines", "mega_image", "mega_search", "search",
+];
+
+test("only public tools are listed, get_context is not", async () => {
+  for (const sdk of [new OpenSERP({ baseUrl: "http://localhost:7000" }), new OpenSERP({ apiKey: "osk_live_xxx" })]) {
+    const server = createMcpServer(sdk);
+    const client = new Client({ name: "tools-test", version: "1" });
+    const [a, b] = InMemoryTransport.createLinkedPair();
+    await server.connect(a); await client.connect(b);
+    try {
+      const { tools } = await client.listTools();
+      assert.deepEqual(tools.map(t => t.name).sort(), PUBLIC_TOOLS);
+    } finally { await client.close(); await server.close(); }
+  }
+});
+
+test("get_context forwards budgets and preserves citations and errors when registered", async () => {
   let denied = false;
   let calls = 0;
   const evidence = { context: "[c1] Документация", partial: true, citations: [{ id: "c1", excerpt: "Документация", source_span: { start: 42, end: 66 } }], billing: { credits_used: 3, credits_remaining: 97 } };
-  const sdk = new OpenSERP({ apiKey: "osk_live_preview", fetch: async (url, init) => {
+  const sdk = new OpenSERP({ apiKey: "osk_live_xxx", fetch: async (url, init) => {
     calls++;
     assert.equal(String(url), "https://api.openserp.org/v1/context");
     assert.equal(init?.method, "POST");
@@ -19,6 +37,7 @@ test("get_context is registered, forwards budgets and preserves citations and pr
     return Response.json(evidence);
   } });
   const server = createMcpServer(sdk);
+  registerContextTool(server, sdk);
   const client = new Client({ name: "context-test", version: "1" });
   const [a, b] = InMemoryTransport.createLinkedPair();
   await server.connect(a); await client.connect(b);

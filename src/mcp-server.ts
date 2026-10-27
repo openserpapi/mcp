@@ -140,27 +140,6 @@ export function createMcpServer(client: OpenSERP): McpServer {
   });
 
   server.registerTool(
-    "get_context",
-    {
-      title: "Get web context",
-      description: "Search a question and optional variants, read sources, and return relevant verbatim passages with citations. No LLM synthesis. maxTokens bounds only the context string in cl100k_base, not the JSON envelope. Inspect partial, truncated and failures. Source spans refer to UTF-8 byte offsets in extracted Markdown. Cloud: admin-account-only preview; uses the account's normal API key and credit balance. Charges successful search/extract steps plus assembly; completely empty context is refunded. Do not retry paid calls automatically.",
-      inputSchema: {
-        query: z.string().min(1).max(2000),
-        queries: z.array(z.string().min(1).max(2000)).max(4).optional(),
-        engines: z.array(z.enum(engines)).min(1).max(3).optional(),
-        lang: z.string().max(32).optional(),
-        region: z.string().max(128).optional(),
-        extractMode: z.enum(extractModes).optional(),
-        maxSources: z.number().int().min(1).max(10).optional(),
-        maxFetches: z.number().int().min(1).max(20).optional(),
-        maxTokens: z.number().int().min(256).max(32000).optional(),
-      },
-      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: false, openWorldHint: true },
-    },
-    async (args) => callTool(client, "get_context", args),
-  );
-
-  server.registerTool(
     "search",
     {
       title: "Search",
@@ -314,4 +293,29 @@ export function createMcpServer(client: OpenSERP): McpServer {
   );
 
   return server;
+}
+
+// Not registered by createMcpServer: self-hosted servers have no /context and
+// Cloud doesn't serve it to every account yet. Call it there once it does.
+export function registerContextTool(server: McpServer, client: OpenSERP): void {
+  server.registerTool(
+    "get_context",
+    {
+      title: "Get web context",
+      description: "Search a question and optional variants, read sources, and return relevant verbatim passages with citations. No LLM synthesis. maxTokens bounds only the context string in cl100k_base, not the JSON envelope. Inspect partial, truncated and failures. Source spans refer to UTF-8 byte offsets in extracted Markdown. Cloud only; uses the account's normal API key and credit balance. Charges successful search/extract steps plus assembly; completely empty context is refunded. Do not retry paid calls automatically.",
+      inputSchema: {
+        query: z.string().min(1).max(2000),
+        queries: z.array(z.string().min(1).max(2000)).max(4).optional(),
+        engines: z.array(z.enum(engines)).min(1).max(3).optional(),
+        lang: z.string().max(32).optional(),
+        region: z.string().max(128).optional(),
+        extractMode: z.enum(extractModes).optional(),
+        maxSources: z.number().int().min(1).max(10).optional(),
+        maxFetches: z.number().int().min(1).max(20).optional(),
+        maxTokens: z.number().int().min(256).max(32000).optional(),
+      },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+    },
+    async (args) => callTool(client, "get_context", args),
+  );
 }

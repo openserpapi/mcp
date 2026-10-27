@@ -1,6 +1,6 @@
 {
   "name": "@openserp/mcp",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "mcpName": "org.openserp/mcp",
   "description": "MCP server for live search on six engines (Google, Bing, Yandex, Baidu, DuckDuckGo, Ecosia), image search and single/batch page extraction. Keeps source engine and rank. Runs against a self-hosted OpenSERP server or OpenSERP Cloud.",
   "type": "module",

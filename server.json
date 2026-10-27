@@ -3,7 +3,7 @@
   "name": "org.openserp/mcp",
   "title": "OpenSERP",
   "description": "Search Google, Bing, Yandex, Baidu, DuckDuckGo and Ecosia with original ranks, plus page extraction.",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "websiteUrl": "https://openserp.org",
   "repository": {
     "url": "https://github.com/openserpapi/mcp",
@@ -27,7 +27,7 @@
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@openserp/mcp",
-      "version": "0.1.11",
+      "version": "0.1.12",
       "runtimeHint": "npx",
       "transport": {
         "type": "stdio"
